@@ -34,11 +34,6 @@ export async function POST(request: Request) {
 
   const { player1, player2, set1, set2, set3, winner } = await request.json()
 
-  // Verificar la contraseña
-  const authHeader = request.headers.get("Authorization")
-  if (authHeader !== `Bearer ${process.env.DATA_ENTRY_PASSWORD}`) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
 
   await initDB()
 
