@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
-import sql from "../../../lib/db"
-import { initDB } from "../../../lib/init-db"
+import sql from "@/lib/db"
+import { initDB } from "@/lib/init-db"
 
 export async function GET() {
   await initDB()

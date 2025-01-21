@@ -1,6 +1,6 @@
 import { neon } from "@neondatabase/serverless"
 
-const sql = neon(process.env.TORNEO_STORAGE_POSTGRES_URL_NO_SSL!)
+const sql = neon(process.env.DATABASE_URL!)
 
 export default sql
 
