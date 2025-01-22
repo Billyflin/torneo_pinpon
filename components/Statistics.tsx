@@ -61,6 +61,35 @@ export default function Statistics({ standings }: StatisticsProps) {
   }, [standings])
   return (
       <div className="space-y-8">
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Comparación de Jugadores</CardTitle>
+            <CardDescription>Puntos promedio por set</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[400px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
+                  <PolarGrid />
+                  <PolarAngleAxis dataKey="name" />
+                  <PolarRadiusAxis angle={30} domain={[0, "auto"]} />
+                  <Radar
+                      name="Puntos promedio por set"
+                      dataKey="averagePointsPerSet"
+                      stroke="#ff7300"
+                      fill="#ff7300"
+                      fillOpacity={0.6}
+                  />
+                  <Legend />
+                  <Tooltip />
+                </RadarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+
+        // Add the following code
         <Card>
           <CardHeader>
             <CardTitle>Estadísticas Generales</CardTitle>
@@ -187,32 +216,6 @@ export default function Statistics({ standings }: StatisticsProps) {
           </Card>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Comparación de Jugadores</CardTitle>
-            <CardDescription>Puntos promedio por set</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[400px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
-                  <PolarGrid />
-                  <PolarAngleAxis dataKey="name" />
-                  <PolarRadiusAxis angle={30} domain={[0, "auto"]} />
-                  <Radar
-                      name="Puntos promedio por set"
-                      dataKey="averagePointsPerSet"
-                      stroke="#ff7300"
-                      fill="#ff7300"
-                      fillOpacity={0.6}
-                  />
-                  <Legend />
-                  <Tooltip />
-                </RadarChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
       </div>
   )
 }
