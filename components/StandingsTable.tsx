@@ -55,56 +55,56 @@ export default function StandingsTable({ standings }: StandingsTableProps) {
     return (
         <div className="relative overflow-hidden rounded-md border">
             <style jsx global>{`
-        @keyframes champion-shine {
-          0%, 100% {
-            background-position: 200% 0;
-          }
-          50% {
-            background-position: -200% 0;
-          }
-        }
-        @keyframes champion-pulse {
-          0%, 100% {
-            transform: scale(1);
-          }
-          50% {
-            transform: scale(1.002);
-          }
-        }
-        .champion-animation {
-          background-size: 200% 100%;
-          animation: champion-shine 10s ease-in-out infinite, champion-pulse 6s ease-in-out infinite;
-          transition: all 0.5s ease;
-        }
-        .champion-animation:hover {
-          box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
-        }
-        .champion-animation .champion-cell::after {
-          content: '';
-          position: absolute;
-          top: -50%;
-          left: -50%;
-          width: 200%;
-          height: 200%;
-          background: linear-gradient(
-            to bottom right,
-            rgba(255, 255, 255, 0) 0%,
-            rgba(255, 255, 255, 0.05) 50%,
-            rgba(255, 255, 255, 0) 100%
-          );
-          transform: rotate(45deg);
-          animation: champion-cell-shine 5s ease-in-out infinite;
-        }
-        @keyframes champion-cell-shine {
-          0%, 100% {
-            transform: translateX(-100%) rotate(45deg);
-          }
-          50% {
-            transform: translateX(100%) rotate(45deg);
-          }
-        }
-      `}</style>
-            <ScrollArea className="h-[calc(100vh-300px)]">
+                @keyframes champion-shine {
+                    0%, 100% {
+                        background-position: 200% 0;
+                    }
+                    50% {
+                        background-position: -200% 0;
+                    }
+                }
+                @keyframes champion-pulse {
+                    0%, 100% {
+                        transform: scale(1);
+                    }
+                    50% {
+                        transform: scale(1.002);
+                    }
+                }
+                .champion-animation {
+                    background-size: 200% 100%;
+                    animation: champion-shine 10s ease-in-out infinite, champion-pulse 6s ease-in-out infinite;
+                    transition: all 0.5s ease;
+                }
+                .champion-animation:hover {
+                    box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+                }
+                .champion-animation .champion-cell::after {
+                    content: '';
+                    position: absolute;
+                    top: -50%;
+                    left: -50%;
+                    width: 200%;
+                    height: 200%;
+                    background: linear-gradient(
+                            to bottom right,
+                            rgba(255, 255, 255, 0) 0%,
+                            rgba(255, 255, 255, 0.05) 50%,
+                            rgba(255, 255, 255, 0) 100%
+                    );
+                    transform: rotate(45deg);
+                    animation: champion-cell-shine 5s ease-in-out infinite;
+                }
+                @keyframes champion-cell-shine {
+                    0%, 100% {
+                        transform: translateX(-100%) rotate(45deg);
+                    }
+                    50% {
+                        transform: translateX(100%) rotate(45deg);
+                    }
+                }
+            `}</style>
+            <ScrollArea className="min-h-[200px] max-h-[calc(100vh-300px)]">
                 <Table>
                     <TableHeader>
                         <TableRow className="bg-muted/50">
