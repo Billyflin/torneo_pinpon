@@ -89,7 +89,6 @@ export default function Statistics({ standings }: StatisticsProps) {
           </CardContent>
         </Card>
 
-        // Add the following code
         <Card>
           <CardHeader>
             <CardTitle>Estadísticas Generales</CardTitle>
