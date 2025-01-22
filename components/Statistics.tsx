@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import {
   Bar,
   BarChart,
@@ -40,17 +40,25 @@ interface StatisticsProps {
 export default function Statistics({ standings }: StatisticsProps) {
   const [sortBy, setSortBy] = useState<keyof Standing>("points")
 
-  const sortedStandings = [...standings].sort((a, b) => b[sortBy] - a[sortBy])
+  const sortedStandings = [...standings].sort((a, b) => {
+    if (typeof a[sortBy] === "number" && typeof b[sortBy] === "number") {
+      return (b[sortBy] as number) - (a[sortBy] as number)
+    }
+    if (typeof a[sortBy] === "string" && typeof b[sortBy] === "string") {
+      return (b[sortBy] as string).localeCompare(a[sortBy] as string)
+    }
+    return 0
+  })
 
   const top5ByEffectiveness = [...standings].sort((a, b) => b.effectiveness - a.effectiveness).slice(0, 5)
   const top5ByLongestStreak = [...standings].sort((a, b) => b.longest_streak - a.longest_streak).slice(0, 5)
-
-  const radarData = standings.map((player) => ({
-    name: player.name,
-    longestStreak: player.longest_streak,
-    averagePointsPerSet: player.total_sets > 0 ? player.total_points / player.total_sets : 0,
-  }))
-
+  useMemo(() => Math.max(...standings.map((s) => s.longest_streak)), [standings]);
+  const radarData = useMemo(() => {
+    return standings.map((player) => ({
+      name: player.name,
+      averagePointsPerSet: player.total_sets > 0 ? player.total_points / player.total_sets : 0,
+    }))
+  }, [standings])
   return (
       <div className="space-y-8">
         <Card>
@@ -166,7 +174,6 @@ export default function Statistics({ standings }: StatisticsProps) {
                     <Tooltip content={<ChartTooltipContent />} />
                     <Bar
                         dataKey="longest_streak"
-                        fill="var(--color-longest_streak)"
                         radius={[4, 4, 0, 0]}
                         label={{
                           position: "top",
@@ -183,7 +190,7 @@ export default function Statistics({ standings }: StatisticsProps) {
         <Card>
           <CardHeader>
             <CardTitle>Comparación de Jugadores</CardTitle>
-            <CardDescription>Racha más larga y puntos promedio por set</CardDescription>
+            <CardDescription>Puntos promedio por set</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="h-[400px]">
@@ -192,13 +199,6 @@ export default function Statistics({ standings }: StatisticsProps) {
                   <PolarGrid />
                   <PolarAngleAxis dataKey="name" />
                   <PolarRadiusAxis angle={30} domain={[0, "auto"]} />
-                  <Radar
-                      name="Racha más larga"
-                      dataKey="longestStreak"
-                      stroke="#ffc658"
-                      fill="#ffc658"
-                      fillOpacity={0.6}
-                  />
                   <Radar
                       name="Puntos promedio por set"
                       dataKey="averagePointsPerSet"

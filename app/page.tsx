@@ -24,6 +24,8 @@ interface Standing {
   current_streak: number
   longest_streak: number
   effectiveness: number
+  total_points: number
+  total_sets: number
 }
 
 interface Player {
