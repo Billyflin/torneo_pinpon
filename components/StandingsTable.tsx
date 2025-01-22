@@ -1,6 +1,5 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
 
 interface Standing {
@@ -42,9 +41,9 @@ export default function StandingsTable({ standings }: StandingsTableProps) {
     const getRowStyle = (index: number) => {
         switch (index) {
             case 0:
-                return "bg-gradient-to-r from-yellow-50 via-yellow-100 to-yellow-50 dark:from-yellow-900/30 dark:via-yellow-800/30 dark:to-yellow-900/30 border-l-4 border-yellow-400 champion-animation"
+                return "bg-gradient-to-r from-yellow-50 via-yellow-150 to-yellow-50 dark:from-yellow-900/30 dark:via-yellow-800/30 dark:to-yellow-900/30 border-l-4 border-yellow-400 champion-animation"
             case 1:
-                return "bg-gray-100 dark:bg-gray-800/30 border-l-4 border-gray-500"
+                return "bg-gray-50 dark:bg-gray-800/30 border-l-4 border-gray-500"
             case 2:
                 return "bg-orange-100 dark:bg-orange-900/30 border-l-4 border-orange-500"
             default:
@@ -68,7 +67,7 @@ export default function StandingsTable({ standings }: StandingsTableProps) {
                         transform: scale(1);
                     }
                     50% {
-                        transform: scale(1.002);
+                        transform: scale(1.0);
                     }
                 }
                 .champion-animation {
@@ -79,32 +78,8 @@ export default function StandingsTable({ standings }: StandingsTableProps) {
                 .champion-animation:hover {
                     box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
                 }
-                .champion-animation .champion-cell::after {
-                    content: '';
-                    position: absolute;
-                    top: -50%;
-                    left: -50%;
-                    width: 200%;
-                    height: 200%;
-                    background: linear-gradient(
-                            to bottom right,
-                            rgba(255, 255, 255, 0) 0%,
-                            rgba(255, 255, 255, 0.05) 50%,
-                            rgba(255, 255, 255, 0) 100%
-                    );
-                    transform: rotate(45deg);
-                    animation: champion-cell-shine 5s ease-in-out infinite;
-                }
-                @keyframes champion-cell-shine {
-                    0%, 100% {
-                        transform: translateX(-100%) rotate(45deg);
-                    }
-                    50% {
-                        transform: translateX(100%) rotate(45deg);
-                    }
-                }
+            
             `}</style>
-            <ScrollArea className="min-h-[200px] max-h-[calc(100vh-300px)]">
                 <Table>
                     <TableHeader>
                         <TableRow className="bg-muted/50">
@@ -178,7 +153,6 @@ export default function StandingsTable({ standings }: StandingsTableProps) {
                         ))}
                     </TableBody>
                 </Table>
-            </ScrollArea>
         </div>
     )
 }

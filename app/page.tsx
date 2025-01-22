@@ -81,6 +81,7 @@ export default function Home() {
                   initial={{ opacity: 0, scale: 0.5 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.5, delay: 0.2 }}
+                  className="flex gap-2"
               >
                 <Button
                     onClick={fetchData}
@@ -93,6 +94,7 @@ export default function Home() {
                   <RefreshCw className={cn("h-4 w-4 mr-2", isRefreshing && "animate-spin")} />
                   {isRefreshing ? "Actualizando..." : "Actualizar datos"}
                 </Button>
+                <MatchEntryPopup players={players} onMatchAdded={handleMatchAdded}      disabled={isRefreshing} />
               </motion.div>
             </div>
           </div>
@@ -127,55 +129,24 @@ export default function Home() {
                       <TabsTrigger value="rules">Reglas</TabsTrigger>
                     </TabsList>
                     <TabsContent value="standings">
-                      <Card>
-                        <CardHeader>
-                          <CardTitle>Clasificación 🏆</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <StandingsTable standings={standings} />
-                        </CardContent>
-                      </Card>
+                      <StandingsTable standings={standings} />
                     </TabsContent>
                     <TabsContent value="pending">
                       <PendingMatchesCollapsible />
                     </TabsContent>
                     <TabsContent value="history">
-                      <Card>
-                        <CardHeader>
-                          <CardTitle>Historial de Partidos 📜</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <MatchHistory />
-                        </CardContent>
-                      </Card>
+                      <MatchHistory />
                     </TabsContent>
                     <TabsContent value="statistics">
-                      <Card>
-                        <CardHeader>
-                          <CardTitle>Estadísticas 📊</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <Statistics standings={standings} />
-                        </CardContent>
-                      </Card>
+                      <Statistics standings={standings} />
                     </TabsContent>
                     <TabsContent value="rules">
-                      <Card>
-                        <CardHeader>
-                          <CardTitle>Reglas del Torneo 📏</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <Rules />
-                        </CardContent>
-                      </Card>
+                      <Rules />
                     </TabsContent>
                   </Tabs>
                 </motion.div>
             )}
           </AnimatePresence>
-          <div className="mt-6 text-center">
-            <MatchEntryPopup players={players} onMatchAdded={handleMatchAdded} />
-          </div>
         </div>
       </div>
   )
