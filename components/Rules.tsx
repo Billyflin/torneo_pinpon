@@ -1,4 +1,4 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card"
 
 export default function Rules() {
     return (
@@ -26,20 +26,35 @@ export default function Rules() {
                 </CardHeader>
                 <CardContent>
                     <ul className="list-disc pl-6 space-y-2">
-                        <li>El saque debe ser cruzado (diagonal) en todo momento.</li>
+                        <li>El saque debe ser <strong>cruzado</strong> (diagonal) en todo momento.</li>
+                        <li>El saque debe ser visible <strong>SIN TRUCOS</strong></li>
                         <li>El jugador que hace el saque continúa sacando hasta que pierda el punto.</li>
-                        <li>Si la pelota toca el techo durante el juego, es punto para el adversario.</li>
-                        <li>No se permite soplar la pelota durante el juego.</li>
-                        <li>
-                            No se permite tocar la pelota de forma intencionada con ninguna parte del cuerpo que no sea la raqueta.
+                        <li> No se permite <strong>tocar la pelota</strong> de forma intencionada con ninguna parte del
+                            cuerpo que no sea
+                            la raqueta.
+                        </li>
+                        <li>Si la pelota <strong>toca el techo</strong> durante el juego, es punto para el adversario.
+                        </li>
+                        <li>En caso de doble falta en el saque (dos intentos fallidos), el punto es para el adversario.
+                            <ul className="list-disc pl-6 mt-2">
+                                <li>Si la pelota toca la red y cae en el lado contrario, se repite el saque.</li>
+                                <li>Si la pelota toca la red y cae en el mismo lado, el punto es para el adversario.
+                                </li>
+                                <li>Si la pelota toca la mesa y cae en el lado contrario, el punto es para el
+                                    adversario.
+                                </li>
+                                <li>Si la pelota toca la mesa y cae en el mismo lado, se repite el punto.</li>
+                                <li>No se permite tocar la mesa con la mano durante el juego. Pero si con la cadera</li>
+                            </ul>
                         </li>
                         <li>
                             En caso de contacto accidental con el dedo:
                             <ul className="list-disc pl-6 mt-2">
                                 <li>El juez o el público decidirá si el punto es válido o no.</li>
-                                <li>Si se determina que fue accidental, se repetirá el punto.</li>
+                                <li>Si el punto es válido, se reanuda el juego.</li>
                             </ul>
                         </li>
+
                     </ul>
                 </CardContent>
             </Card>
@@ -54,7 +69,8 @@ export default function Rules() {
                         <li>Victoria: 3 puntos</li>
                         <li>Derrota: 0 puntos</li>
                         <li>La clasificación se determina por el total de puntos acumulados.</li>
-                        <li>En caso de empate en puntos, se considerará la diferencia de sets ganados y perdidos.</li>
+                        <li>No existe limite de tiempo en los partidos</li>
+                        <li><strong>No existe el empate</strong>, el partido continuará hasta que haya un ganador.</li>
                     </ul>
                 </CardContent>
             </Card>
