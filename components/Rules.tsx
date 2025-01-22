@@ -86,13 +86,17 @@ export default function Rules() {
                                     <ul className="list-disc pl-6 mt-2">
                                         <li>El juez o el público decidirá si el punto es válido o no.</li>
                                         <li>Si el punto es válido, se reanuda el juego.</li>
+                                        <li>Si el dedo entra en contacto accidentalmente muy a menudo, se hará una
+                                            votación para decidir si se le corta el dedo al culpable (esto es broma, o
+                                            no). La decisión final será del "weón" a cargo.
+                                        </li>
                                     </ul>
                                 </li>
                             </>
                         ) : (
                             <>
                                 <li>
-                                    Подача должна быть <strong>по диагонали</strong> всегда.
+                                Подача должна быть <strong>по диагонали</strong> всегда.
                                 </li>
                                 <li>
                                     Подача должна быть видимой <strong>БЕЗ ТРЮКОВ</strong>
@@ -121,6 +125,10 @@ export default function Rules() {
                                     <ul className="list-disc pl-6 mt-2">
                                         <li>Судья или зрители решат, засчитывать ли очко.</li>
                                         <li>Если очко засчитано, игра продолжается.</li>
+                                        <li>Если случайный контакт с пальцем происходит слишком часто, будет проведено
+                                            голосование, чтобы решить, стоит ли отрезать этот палец (шутка, или нет).
+                                            Окончательное решение принимает "weón" на месте.
+                                        </li>
                                     </ul>
                                 </li>
                             </>
