@@ -58,11 +58,6 @@ export async function POST(request: Request) {
 
   const { player1, player2, set1, set2, set3, winner } = await request.json()
 
-  // Verificar el token
-  const authHeader = request.headers.get("Authorization")
-  if (authHeader !== `Bearer ${BEARER_TOKEN}`) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
 
   // Verificar si el partido ya existe
   const existingMatch = await sql`
