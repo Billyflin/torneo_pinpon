@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Skeleton } from "@/components/ui/skeleton"
 import { motion, AnimatePresence } from "framer-motion"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 
 interface PendingMatch {
   player1: string
@@ -71,8 +72,7 @@ export default function PendingMatchesCollapsible() {
                       <Table>
                         <TableHeader>
                           <TableRow>
-                            <TableHead>Jugador 1</TableHead>
-                            <TableHead>Jugador 2</TableHead>
+                            <TableHead>Jugadores</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -80,10 +80,7 @@ export default function PendingMatchesCollapsible() {
                             ? Array.from({ length: 5 }).map((_, index) => (
                                 <TableRow key={index}>
                                   <TableCell>
-                                    <Skeleton className="h-4 w-[100px]" />
-                                  </TableCell>
-                                  <TableCell>
-                                    <Skeleton className="h-4 w-[100px]" />
+                                    <Skeleton className="h-4 w-full" />
                                   </TableCell>
                                 </TableRow>
                               ))
@@ -94,8 +91,15 @@ export default function PendingMatchesCollapsible() {
                                   animate={{ opacity: 1, x: 0 }}
                                   transition={{ duration: 0.3, delay: index * 0.05 }}
                                 >
-                                  <TableCell>{match.player1} 🏓</TableCell>
-                                  <TableCell>{match.player2} 🏓</TableCell>
+                                  <TableCell>
+                                    <Badge variant="outline" className="mr-2">
+                                      {match.player1}
+                                    </Badge>
+                                    vs
+                                    <Badge variant="outline" className="ml-2">
+                                      {match.player2}
+                                    </Badge>
+                                  </TableCell>
                                 </motion.tr>
                               ))}
                         </TableBody>

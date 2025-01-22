@@ -3,6 +3,8 @@ import { motion } from "framer-motion"
 import { Badge } from "@/components/ui/badge"
 import { useCallback } from "react"
 import { cn } from "@/lib/utils"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 interface Standing {
   name: string
@@ -34,55 +36,75 @@ export default function StandingsTable({ standings, onHover }: StandingsTablePro
     }
   }, [])
 
+  const getStreakEmoji = useCallback((streak: number) => {
+    if (streak >= 5) return "🔥🔥🔥"
+    if (streak >= 3) return "🔥🔥"
+    if (streak >= 1) return "🔥"
+    return "❄️"
+  }, [])
+
   return (
-    <div className="overflow-x-auto">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="font-bold">Posición</TableHead>
-            <TableHead className="font-bold">Jugador</TableHead>
-            <TableHead className="font-bold">Puntos</TableHead>
-            <TableHead className="font-bold">PJ</TableHead>
-            <TableHead className="font-bold">PG</TableHead>
-            <TableHead className="font-bold">PP</TableHead>
-            <TableHead className="font-bold">Efectividad</TableHead>
-            <TableHead className="font-bold">Racha Actual</TableHead>
-            <TableHead className="font-bold">Racha Más Larga</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {standings.map((standing, index) => (
-            <motion.tr
-              key={standing.name}
-              className={cn(getRowStyle(index))}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.3, delay: index * 0.1 }}
-              whileHover={{ scale: 1.01 }}
-              onHoverStart={() => index === 0 && onHover()}
-            >
-              <TableCell className="font-medium">{index + 1}</TableCell>
-              <TableCell className="font-medium">{standing.name}</TableCell>
-              <TableCell className="font-bold">
-                <Badge variant="secondary">{standing.points} 🏆</Badge>
-              </TableCell>
-              <TableCell>{standing.matches_played}</TableCell>
-              <TableCell>{standing.wins}</TableCell>
-              <TableCell>{standing.losses}</TableCell>
-              <TableCell className="font-bold">
-                <Badge variant="outline">{(standing.effectiveness * 100).toFixed(2)}%</Badge>
-              </TableCell>
-              <TableCell>
-                <Badge variant="default">{standing.current_streak} 🔥</Badge>
-              </TableCell>
-              <TableCell>
-                <Badge variant="default">{standing.longest_streak} 🌟</Badge>
-              </TableCell>
-            </motion.tr>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
+      <ScrollArea className="h-[calc(100vh-300px)] rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-12">Pos</TableHead>
+              <TableHead>Jugador</TableHead>
+              <TableHead className="text-right">Pts</TableHead>
+              <TableHead className="text-right hidden md:table-cell">PJ</TableHead>
+              <TableHead className="text-right hidden md:table-cell">PG</TableHead>
+              <TableHead className="text-right hidden md:table-cell">PP</TableHead>
+              <TableHead className="text-right hidden md:table-cell">Efec</TableHead>
+              <TableHead className="text-right">Racha</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {standings.map((standing, index) => (
+                <TooltipProvider key={standing.name}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <TableRow
+                          className={cn("cursor-pointer transition-colors hover:bg-muted/50", getRowStyle(index))}
+                          onMouseEnter={() => index === 0 && onHover()}
+                      >
+                        <TableCell className="font-medium">{index + 1}</TableCell>
+                        <TableCell className="font-medium">{standing.name}</TableCell>
+                        <TableCell className="text-right">
+                          <Badge variant="secondary">{standing.points}</Badge>
+                        </TableCell>
+                        <TableCell className="text-right hidden md:table-cell">{standing.matches_played}</TableCell>
+                        <TableCell className="text-right hidden md:table-cell">{standing.wins}</TableCell>
+                        <TableCell className="text-right hidden md:table-cell">{standing.losses}</TableCell>
+                        <TableCell className="text-right hidden md:table-cell">
+                          <Badge variant="outline">{(standing.effectiveness * 100).toFixed(0)}%</Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Badge variant="default">
+                            {standing.current_streak} {getStreakEmoji(standing.current_streak)}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    </TooltipTrigger>
+                    <TooltipContent side="right" className="p-4 w-64">
+                      <div className="text-sm">
+                        <h3 className="font-bold mb-2">{standing.name}</h3>
+                        <p>Puntos: {standing.points} 🏆</p>
+                        <p>Partidos jugados: {standing.matches_played}</p>
+                        <p>Victorias: {standing.wins} 🎉</p>
+                        <p>Derrotas: {standing.losses} 😢</p>
+                        <p>Efectividad: {(standing.effectiveness * 100).toFixed(2)}% ⚡</p>
+                        <p>
+                          Racha actual: {standing.current_streak} {getStreakEmoji(standing.current_streak)}
+                        </p>
+                        <p>Mejor racha: {standing.longest_streak} 🌟</p>
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+            ))}
+          </TableBody>
+        </Table>
+      </ScrollArea>
   )
 }
 
