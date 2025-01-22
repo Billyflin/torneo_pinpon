@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { FeaturedMatch } from "./FeaturedMatch"
+import { Skeleton } from "@/components/ui/skeleton"
 
 interface PendingMatch {
   player1: string
@@ -47,7 +48,13 @@ export default function PendingMatchesCollapsible() {
   const remainingMatches = shuffledPendingMatches.slice(6)
 
   if (isLoading) {
-    return <div>Cargando partidos pendientes...</div>
+    return (
+        <div className="space-y-6">
+          <Skeleton className="h-[200px] w-full" />
+          <Skeleton className="h-[150px] w-full" />
+          <Skeleton className="h-[200px] w-full" />
+        </div>
+    )
   }
 
   return (
@@ -58,19 +65,23 @@ export default function PendingMatchesCollapsible() {
           ))}
         </div>
 
-        <Card>
+        <Card className="">
           <CardHeader>
-            <CardTitle>Próximos Partidos</CardTitle>
+            <CardTitle className="">Próximos Partidos</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
               {highlightedMatches.map((match, index) => (
-                  <Card key={index}>
+                  <Card key={index} className="">
                     <CardContent className="p-4">
                       <div className="flex flex-col items-center space-y-2">
-                        <Badge variant="outline">{match.player1}</Badge>
+                        <Badge variant="secondary" className="">
+                          {match.player1}
+                        </Badge>
                         <span className="text-sm font-bold">VS</span>
-                        <Badge variant="outline">{match.player2}</Badge>
+                        <Badge variant="secondary" className="">
+                          {match.player2}
+                        </Badge>
                       </div>
                     </CardContent>
                   </Card>
@@ -79,9 +90,9 @@ export default function PendingMatchesCollapsible() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="">
           <CardHeader>
-            <CardTitle>Partidos Restantes ({remainingMatches.length})</CardTitle>
+            <CardTitle className="">Partidos Restantes ({remainingMatches.length})</CardTitle>
           </CardHeader>
           <CardContent>
             <ScrollArea className="h-[200px]">
