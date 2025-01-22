@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Button } from "@/components/ui/button"
@@ -56,76 +55,74 @@ export default function MatchHistory() {
   }
 
   return (
-      <Card>
-        <CardContent>
-          <ScrollArea className="h-[400px] rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[100px]">Fecha</TableHead>
-                  <TableHead>Jugadores</TableHead>
-                  <TableHead className="text-right">Resultado</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {isLoading ? (
-                    <TableRow>
-                      <TableCell colSpan={3} className="text-center">
-                        Cargando partidos...
-                      </TableCell>
-                    </TableRow>
-                ) : paginatedMatches.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={3} className="text-center">
-                        No hay partidos registrados
-                      </TableCell>
-                    </TableRow>
-                ) : (
-                    paginatedMatches.map((match) => (
-                        <TableRow key={match.id}>
-                          <TableCell className="font-medium">{format(new Date(match.played_at), "dd/MM/yy HH:mm")}</TableCell>
-                          <TableCell>
-                            <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-                              <Badge variant={match.winner === match.player1 ? "default" : "outline"}>{match.player1}</Badge>
-                              <span className="hidden sm:inline">vs</span>
-                              <Badge variant={match.winner === match.player2 ? "default" : "outline"}>{match.player2}</Badge>
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex flex-col items-end gap-1">
-                              <span>{formatScore(match.set1_score)}</span>
-                              <span>{formatScore(match.set2_score)}</span>
-                              {match.set3_score && <span>{formatScore(match.set3_score)}</span>}
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                    ))
-                )}
-              </TableBody>
-            </Table>
-          </ScrollArea>
-          <div className="flex items-center justify-end space-x-2 py-4">
-            <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-            >
-              <ChevronLeft className="h-4 w-4" />
-              Anterior
-            </Button>
-            <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                disabled={currentPage === totalPages}
-            >
-              Siguiente
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="space-y-4">
+        <ScrollArea className="h-[400px] rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[100px]">Fecha</TableHead>
+                <TableHead>Jugadores</TableHead>
+                <TableHead className="text-right">Resultado</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={3} className="text-center">
+                      Cargando partidos...
+                    </TableCell>
+                  </TableRow>
+              ) : paginatedMatches.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={3} className="text-center">
+                      No hay partidos registrados
+                    </TableCell>
+                  </TableRow>
+              ) : (
+                  paginatedMatches.map((match) => (
+                      <TableRow key={match.id}>
+                        <TableCell className="font-medium">{format(new Date(match.played_at), "dd/MM/yy HH:mm")}</TableCell>
+                        <TableCell>
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
+                            <Badge variant={match.winner === match.player1 ? "default" : "outline"}>{match.player1}</Badge>
+                            <span className="hidden sm:inline">vs</span>
+                            <Badge variant={match.winner === match.player2 ? "default" : "outline"}>{match.player2}</Badge>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex flex-col items-end gap-1">
+                            <span>{formatScore(match.set1_score)}</span>
+                            <span>{formatScore(match.set2_score)}</span>
+                            {match.set3_score && <span>{formatScore(match.set3_score)}</span>}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                  ))
+              )}
+            </TableBody>
+          </Table>
+        </ScrollArea>
+        <div className="flex items-center justify-end space-x-2">
+          <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+          >
+            <ChevronLeft className="h-4 w-4 mr-2" />
+            Anterior
+          </Button>
+          <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+          >
+            Siguiente
+            <ChevronRight className="h-4 w-4 ml-2" />
+          </Button>
+        </div>
+      </div>
   )
 }
 

@@ -1,19 +1,19 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import dynamic from "next/dynamic"
 import StandingsTable from "../components/StandingsTable"
 import MatchHistory from "../components/MatchHistory"
 import PendingMatchesCollapsible from "../components/PendingMatchesCollapsible"
 import MatchEntryPopup from "../components/MatchEntryPopup"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { RefreshCw } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-
-const ReactConfetti = dynamic(() => import("react-confetti"), { ssr: false })
+import { cn } from "@/lib/utils"
+import Statistics from "../components/Statistics"
+import Rules from "../components/Rules"
 
 interface Standing {
   name: string
@@ -34,11 +34,11 @@ interface Player {
 export default function Home() {
   const [standings, setStandings] = useState<Standing[]>([])
   const [players, setPlayers] = useState<Player[]>([])
-  const [showConfetti, setShowConfetti] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
   const fetchData = async () => {
-    setIsLoading(true)
+    setIsRefreshing(true)
     try {
       const standingsResponse = await fetch("/api/tournament")
       const standingsData = await standingsResponse.json()
@@ -51,6 +51,7 @@ export default function Home() {
       console.error("Error fetching data:", error)
     } finally {
       setIsLoading(false)
+      setIsRefreshing(false)
     }
   }
 
@@ -58,72 +59,121 @@ export default function Home() {
     fetchData()
   }, [])
 
-  const handleConfetti = () => {
-    setShowConfetti(true)
-    setTimeout(() => setShowConfetti(false), 5000)
-  }
-
   return (
-    <div className="min-h-screen bg-background">
-      {showConfetti && <ReactConfetti recycle={false} />}
-      <div className="container mx-auto p-4">
-        <motion.h1
-          className="text-3xl md:text-4xl font-bold mb-6 text-center"
-          initial={{ opacity: 0, y: -50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          Torneo de Ping Pong BeCloud 🏓
-        </motion.h1>
-        <div className="flex justify-center mb-6">
-          <Button onClick={fetchData} className="flex items-center gap-2">
-            <RefreshCw className="h-4 w-4" />
-            Actualizar datos
-          </Button>
-        </div>
-        {isLoading ? (
-          <div className="space-y-6">
-            <Skeleton className="h-[300px] w-full" />
-            <Skeleton className="h-[100px] w-full" />
-            <Skeleton className="h-[300px] w-full" />
+      <div className="min-h-screen bg-background">
+        <header className="bg-background border-b py-6 px-4 mb-8">
+          <div className="container mx-auto">
+            <div className="flex flex-col md:flex-row justify-between items-center">
+              <motion.div
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                  className="flex items-center mb-4 md:mb-0"
+              >
+                <h1 className="text-3xl md:text-4xl font-bold mr-2">Torneo de Ping Pong BeCloud</h1>
+                <span className="text-4xl">🏓</span>
+              </motion.div>
+              <motion.div
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+              >
+                <Button
+                    onClick={fetchData}
+                    className={cn(
+                        "bg-blue-500 text-white hover:bg-blue-600 transition-all duration-300",
+                        isRefreshing && "animate-pulse",
+                    )}
+                    disabled={isRefreshing}
+                >
+                  <RefreshCw className={cn("h-4 w-4 mr-2", isRefreshing && "animate-spin")} />
+                  {isRefreshing ? "Actualizando..." : "Actualizar datos"}
+                </Button>
+              </motion.div>
+            </div>
           </div>
-        ) : (
-          <Tabs defaultValue="standings" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 mb-6">
-              <TabsTrigger value="standings">Clasificación</TabsTrigger>
-              <TabsTrigger value="pending">Pendientes</TabsTrigger>
-              <TabsTrigger value="history">Historial</TabsTrigger>
-            </TabsList>
-            <TabsContent value="standings">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Clasificación 🏆</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <StandingsTable standings={standings} onHover={handleConfetti} />
-                </CardContent>
-              </Card>
-            </TabsContent>
-            <TabsContent value="pending">
-              <PendingMatchesCollapsible />
-            </TabsContent>
-            <TabsContent value="history">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Historial de Partidos 📜</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <MatchHistory />
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
-        )}
-        <div className="mt-6 text-center">
-          <MatchEntryPopup players={players} onMatchAdded={handleConfetti} />
+        </header>
+        <div className="container mx-auto px-4">
+          <AnimatePresence>
+            {isLoading ? (
+                <motion.div
+                    key="loading"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="space-y-6"
+                >
+                  <Skeleton className="h-[300px] w-full" />
+                  <Skeleton className="h-[100px] w-full" />
+                  <Skeleton className="h-[300px] w-full" />
+                </motion.div>
+            ) : (
+                <motion.div
+                    key="content"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                >
+                  <Tabs defaultValue="standings" className="w-full">
+                    <TabsList className="grid w-full grid-cols-5 mb-6">
+                      <TabsTrigger value="standings">Clasificación</TabsTrigger>
+                      <TabsTrigger value="pending">Pendientes</TabsTrigger>
+                      <TabsTrigger value="history">Historial</TabsTrigger>
+                      <TabsTrigger value="statistics">Estadísticas</TabsTrigger>
+                      <TabsTrigger value="rules">Reglas</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="standings">
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>Clasificación 🏆</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <StandingsTable standings={standings} />
+                        </CardContent>
+                      </Card>
+                    </TabsContent>
+                    <TabsContent value="pending">
+                      <PendingMatchesCollapsible />
+                    </TabsContent>
+                    <TabsContent value="history">
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>Historial de Partidos 📜</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <MatchHistory />
+                        </CardContent>
+                      </Card>
+                    </TabsContent>
+                    <TabsContent value="statistics">
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>Estadísticas 📊</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <Statistics standings={standings} />
+                        </CardContent>
+                      </Card>
+                    </TabsContent>
+                    <TabsContent value="rules">
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>Reglas del Torneo 📏</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <Rules />
+                        </CardContent>
+                      </Card>
+                    </TabsContent>
+                  </Tabs>
+                </motion.div>
+            )}
+          </AnimatePresence>
+          <div className="mt-6 text-center">
+            <MatchEntryPopup players={players} />
+          </div>
         </div>
       </div>
-    </div>
   )
 }
 

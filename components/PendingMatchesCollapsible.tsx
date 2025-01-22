@@ -1,14 +1,10 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { Button } from "@/components/ui/button"
-import { ChevronDown, ChevronUp } from "lucide-react"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Skeleton } from "@/components/ui/skeleton"
-import { motion, AnimatePresence } from "framer-motion"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { FeaturedMatch } from "./FeaturedMatch"
 
 interface PendingMatch {
   player1: string
@@ -16,7 +12,6 @@ interface PendingMatch {
 }
 
 export default function PendingMatchesCollapsible() {
-  const [isOpen, setIsOpen] = useState(false)
   const [pendingMatches, setPendingMatches] = useState<PendingMatch[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
@@ -47,72 +42,62 @@ export default function PendingMatchesCollapsible() {
 
   const shuffledPendingMatches = useMemo(() => shuffleArray(pendingMatches), [pendingMatches])
 
+  const featuredMatches = shuffledPendingMatches.slice(0, 2)
+  const highlightedMatches = shuffledPendingMatches.slice(2, 6)
+  const remainingMatches = shuffledPendingMatches.slice(6)
+
+  if (isLoading) {
+    return <div>Cargando partidos pendientes...</div>
+  }
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>
-          <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-            <CollapsibleTrigger asChild>
-              <Button variant="outline" className="flex justify-between w-full">
-                <span>Partidos Pendientes {!isLoading && `(${pendingMatches.length})`}</span>
-                {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-              </Button>
-            </CollapsibleTrigger>
-            <CollapsibleContent forceMount>
-              <CardContent>
-                <AnimatePresence>
-                  {isOpen && (
-                    <motion.div
-                      className="overflow-hidden"
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Jugadores</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {isLoading
-                            ? Array.from({ length: 5 }).map((_, index) => (
-                                <TableRow key={index}>
-                                  <TableCell>
-                                    <Skeleton className="h-4 w-full" />
-                                  </TableCell>
-                                </TableRow>
-                              ))
-                            : shuffledPendingMatches.map((match, index) => (
-                                <motion.tr
-                                  key={index}
-                                  initial={{ opacity: 0, x: -20 }}
-                                  animate={{ opacity: 1, x: 0 }}
-                                  transition={{ duration: 0.3, delay: index * 0.05 }}
-                                >
-                                  <TableCell>
-                                    <Badge variant="outline" className="mr-2">
-                                      {match.player1}
-                                    </Badge>
-                                    vs
-                                    <Badge variant="outline" className="ml-2">
-                                      {match.player2}
-                                    </Badge>
-                                  </TableCell>
-                                </motion.tr>
-                              ))}
-                        </TableBody>
-                      </Table>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </CardContent>
-            </CollapsibleContent>
-          </Collapsible>
-        </CardTitle>
-      </CardHeader>
-    </Card>
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {featuredMatches.map((match, index) => (
+              <FeaturedMatch key={index} player1={match.player1} player2={match.player2} />
+          ))}
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Próximos Partidos</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+              {highlightedMatches.map((match, index) => (
+                  <Card key={index}>
+                    <CardContent className="p-4">
+                      <div className="flex flex-col items-center space-y-2">
+                        <Badge variant="outline">{match.player1}</Badge>
+                        <span className="text-sm font-bold">VS</span>
+                        <Badge variant="outline">{match.player2}</Badge>
+                      </div>
+                    </CardContent>
+                  </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Partidos Restantes ({remainingMatches.length})</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ScrollArea className="h-[200px]">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                {remainingMatches.map((match, index) => (
+                    <div key={index} className="flex items-center justify-between p-2 border rounded">
+                      <span className="text-sm">{match.player1}</span>
+                      <span className="text-xs font-bold mx-1">VS</span>
+                      <span className="text-sm">{match.player2}</span>
+                    </div>
+                ))}
+              </div>
+            </ScrollArea>
+          </CardContent>
+        </Card>
+      </div>
   )
 }
 
