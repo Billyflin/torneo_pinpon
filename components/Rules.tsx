@@ -33,6 +33,10 @@ export default function Rules() {
                             cuerpo que no sea
                             la raqueta.
                         </li>
+                        <li>No se permite <strong> tocar la mesa </strong> con la mano durante el juego. Pero si con la
+                            cadera
+                        </li>
+
                         <li>Si la pelota <strong>toca el techo</strong> durante el juego, es punto para el adversario.
                         </li>
                         <li>En caso de doble falta en el saque (dos intentos fallidos), el punto es para el adversario.
@@ -44,7 +48,6 @@ export default function Rules() {
                                     adversario.
                                 </li>
                                 <li>Si la pelota toca la mesa y cae en el mismo lado, se repite el punto.</li>
-                                <li>No se permite tocar la mesa con la mano durante el juego. Pero si con la cadera</li>
                             </ul>
                         </li>
                         <li>
