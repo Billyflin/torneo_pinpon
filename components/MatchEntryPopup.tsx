@@ -1,128 +1,275 @@
-import { useEffect, useState } from "react"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight } from "lucide-react"
-import { format } from "date-fns"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { X } from "lucide-react"
 
-interface Match {
+interface Player {
   id: number
-  player1: string
-  player2: string
-  winner: string
-  set1_score: string
-  set2_score: string
-  set3_score: string | null
-  played_at: string
+  name: string
 }
 
-const ITEMS_PER_PAGE = 10
+interface MatchEntryPopupProps {
+  players: Player[]
+  onMatchAdded: () => void
+}
 
-export default function MatchHistory() {
-  const [matches, setMatches] = useState<Match[]>([])
-  const [currentPage, setCurrentPage] = useState(1)
-  const [isLoading, setIsLoading] = useState(true)
+export default function MatchEntryPopup({ players, onMatchAdded }: MatchEntryPopupProps) {
+  const [isOpen, setIsOpen] = useState(false)
+  const [step, setStep] = useState<"password" | "matchData">("password")
+  const [password, setPassword] = useState("")
+  const [matchData, setMatchData] = useState({
+    player1: "",
+    player2: "",
+    set1Player1: "",
+    set1Player2: "",
+    set2Player1: "",
+    set2Player2: "",
+    set3Player1: "",
+    set3Player2: "",
+  })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showPasswordAlert, setShowPasswordAlert] = useState(false)
 
   useEffect(() => {
-    const fetchMatches = async () => {
-      setIsLoading(true)
-      try {
-        const response = await fetch("/api/matches")
-        const data = await response.json()
-        setMatches(data)
-      } catch (error) {
-        console.error("Error fetching matches:", error)
-      } finally {
-        setIsLoading(false)
-      }
+    const storedPassword = localStorage.getItem("tournamentPassword")
+    if (storedPassword) {
+      setPassword(storedPassword)
+      verifyPassword(storedPassword)
+    } else {
+      setShowPasswordAlert(true)
     }
-
-    fetchMatches()
   }, [])
 
-  const totalPages = Math.ceil(matches.length / ITEMS_PER_PAGE)
-  const paginatedMatches = matches.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)
+  const verifyPassword = async (pwd: string) => {
+    try {
+      const response = await fetch("/api/verify-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ password: pwd }),
+      })
 
-  const formatScore = (score: string) => {
-    const [score1, score2] = score.split("-")
-    return (
-        <span>
-        <span className={Number(score1) > Number(score2) ? "font-bold" : ""}>{score1}</span>-
-        <span className={Number(score2) > Number(score1) ? "font-bold" : ""}>{score2}</span>
-      </span>
-    )
+      if (response.ok) {
+        setStep("matchData")
+        localStorage.setItem("tournamentPassword", pwd)
+      } else {
+        setStep("password")
+        localStorage.removeItem("tournamentPassword")
+        setShowPasswordAlert(true)
+      }
+    } catch (error) {
+      console.error("Error:", error)
+      alert("Error al verificar la contraseña")
+    }
+  }
+
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    await verifyPassword(password)
+  }
+
+  const handleMatchSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (isSubmitting) return
+
+    setIsSubmitting(true)
+
+    // Validar que los sets sean correctos
+    const sets = [
+      [Number.parseInt(matchData.set1Player1), Number.parseInt(matchData.set1Player2)],
+      [Number.parseInt(matchData.set2Player1), Number.parseInt(matchData.set2Player2)],
+      [Number.parseInt(matchData.set3Player1), Number.parseInt(matchData.set3Player2)],
+    ].filter((set) => !isNaN(set[0]) && !isNaN(set[1]))
+
+    if (sets.length < 2) {
+      alert("Debes ingresar al menos dos sets válidos")
+      setIsSubmitting(false)
+      return
+    }
+
+    if (sets.some((set) => set[0] < 21 && set[1] < 21)) {
+      alert("Al menos un jugador debe llegar a 21 puntos en cada set")
+      setIsSubmitting(false)
+      return
+    }
+
+    if (sets.some((set) => Math.abs(set[0] - set[1]) < 2)) {
+      alert("Debe haber una diferencia de al menos 2 puntos en cada set")
+      setIsSubmitting(false)
+      return
+    }
+
+    const winner =
+        sets.filter((set) => set[0] > set[1]).length > sets.filter((set) => set[1] > set[0]).length
+            ? matchData.player1
+            : matchData.player2
+
+    try {
+      const response = await fetch("/api/tournament", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${password}`,
+        },
+        body: JSON.stringify({
+          player1: matchData.player1,
+          player2: matchData.player2,
+          set1: `${matchData.set1Player1}-${matchData.set1Player2}`,
+          set2: `${matchData.set2Player1}-${matchData.set2Player2}`,
+          set3: sets.length === 3 ? `${matchData.set3Player1}-${matchData.set3Player2}` : null,
+          winner,
+        }),
+      })
+
+      if (response.ok) {
+        alert("Partido registrado con éxito")
+        setIsOpen(false)
+        setMatchData({
+          player1: "",
+          player2: "",
+          set1Player1: "",
+          set1Player2: "",
+          set2Player1: "",
+          set2Player2: "",
+          set3Player1: "",
+          set3Player2: "",
+        })
+        onMatchAdded()
+      } else {
+        const errorData = await response.json()
+        alert(`Error al registrar el partido: ${errorData.error}`)
+      }
+    } catch (error) {
+      console.error("Error:", error)
+      alert("Error al registrar el partido")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleClearPassword = () => {
+    localStorage.removeItem("tournamentPassword")
+    setPassword("")
+    setStep("password")
+    setShowPasswordAlert(true)
   }
 
   return (
-      <div className="space-y-4">
-        <ScrollArea className="h-[400px] rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[100px]">Fecha</TableHead>
-                <TableHead>Jugadores</TableHead>
-                <TableHead className="text-right">Resultado</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                  <TableRow>
-                    <TableCell colSpan={3} className="text-center">
-                      Cargando partidos...
-                    </TableCell>
-                  </TableRow>
-              ) : paginatedMatches.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={3} className="text-center">
-                      No hay partidos registrados
-                    </TableCell>
-                  </TableRow>
-              ) : (
-                  paginatedMatches.map((match) => (
-                      <TableRow key={match.id}>
-                        <TableCell className="font-medium">{format(new Date(match.played_at), "dd/MM/yy HH:mm")}</TableCell>
-                        <TableCell>
-                          <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-                            <Badge variant={match.winner === match.player1 ? "default" : "outline"}>{match.player1}</Badge>
-                            <span className="hidden sm:inline">vs</span>
-                            <Badge variant={match.winner === match.player2 ? "default" : "outline"}>{match.player2}</Badge>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex flex-col items-end gap-1">
-                            <span>{formatScore(match.set1_score)}</span>
-                            <span>{formatScore(match.set2_score)}</span>
-                            {match.set3_score && <span>{formatScore(match.set3_score)}</span>}
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                  ))
-              )}
-            </TableBody>
-          </Table>
-        </ScrollArea>
-        <div className="flex items-center justify-end space-x-2">
-          <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-          >
-            <ChevronLeft className="h-4 w-4 mr-2" />
-            Anterior
-          </Button>
-          <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-              disabled={currentPage === totalPages}
-          >
-            Siguiente
-            <ChevronRight className="h-4 w-4 ml-2" />
-          </Button>
-        </div>
-      </div>
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogTrigger asChild>
+          <Button>Ingresar Partido</Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Ingresar Nuevo Partido</DialogTitle>
+          </DialogHeader>
+          {showPasswordAlert && (
+              <Alert>
+                <AlertTitle>Contraseña no guardada</AlertTitle>
+                <AlertDescription>
+                  No se ha guardado ninguna contraseña. Por favor, ingrese la contraseña para continuar.
+                </AlertDescription>
+              </Alert>
+          )}
+          {step === "password" ? (
+              <form onSubmit={handlePasswordSubmit} className="space-y-4">
+                <Input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Contraseña"
+                    required
+                />
+                <Button type="submit">Verificar</Button>
+              </form>
+          ) : (
+              <form onSubmit={handleMatchSubmit} className="space-y-4">
+                <Select onValueChange={(value) => setMatchData({ ...matchData, player1: value })}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Jugador 1" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {players.map((player) => (
+                        <SelectItem key={player.id} value={player.name}>
+                          {player.name}
+                        </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select onValueChange={(value) => setMatchData({ ...matchData, player2: value })}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Jugador 2" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {players.map((player) => (
+                        <SelectItem key={player.id} value={player.name}>
+                          {player.name}
+                        </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <div className="flex space-x-2">
+                  <Input
+                      type="number"
+                      value={matchData.set1Player1}
+                      onChange={(e) => setMatchData({ ...matchData, set1Player1: e.target.value })}
+                      placeholder="Set 1 J1"
+                      required
+                  />
+                  <Input
+                      type="number"
+                      value={matchData.set1Player2}
+                      onChange={(e) => setMatchData({ ...matchData, set1Player2: e.target.value })}
+                      placeholder="Set 1 J2"
+                      required
+                  />
+                </div>
+                <div className="flex space-x-2">
+                  <Input
+                      type="number"
+                      value={matchData.set2Player1}
+                      onChange={(e) => setMatchData({ ...matchData, set2Player1: e.target.value })}
+                      placeholder="Set 2 J1"
+                      required
+                  />
+                  <Input
+                      type="number"
+                      value={matchData.set2Player2}
+                      onChange={(e) => setMatchData({ ...matchData, set2Player2: e.target.value })}
+                      placeholder="Set 2 J2"
+                      required
+                  />
+                </div>
+                <div className="flex space-x-2">
+                  <Input
+                      type="number"
+                      value={matchData.set3Player1}
+                      onChange={(e) => setMatchData({ ...matchData, set3Player1: e.target.value })}
+                      placeholder="Set 3 J1 (opcional)"
+                  />
+                  <Input
+                      type="number"
+                      value={matchData.set3Player2}
+                      onChange={(e) => setMatchData({ ...matchData, set3Player2: e.target.value })}
+                      placeholder="Set 3 J2 (opcional)"
+                  />
+                </div>
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? "Guardando..." : "Guardar"}
+                </Button>
+              </form>
+          )}
+          {step === "matchData" && (
+              <Button variant="outline" onClick={handleClearPassword} className="mt-4">
+                <X className="mr-2 h-4 w-4" /> Borrar contraseña guardada
+              </Button>
+          )}
+        </DialogContent>
+      </Dialog>
   )
 }
 

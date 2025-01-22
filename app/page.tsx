@@ -55,6 +55,10 @@ export default function Home() {
     }
   }
 
+  const handleMatchAdded = () => {
+    fetchData()
+  }
+
   useEffect(() => {
     fetchData()
   }, [])
@@ -170,7 +174,7 @@ export default function Home() {
             )}
           </AnimatePresence>
           <div className="mt-6 text-center">
-            <MatchEntryPopup players={players} />
+            <MatchEntryPopup players={players} onMatchAdded={handleMatchAdded} />
           </div>
         </div>
       </div>
